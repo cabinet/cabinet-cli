@@ -61,16 +61,16 @@ class CabinetWrapper:
 
         if vault_name:
             self.vault_name = vault_name
-        elif self.config['default_vault']:
-            self.vault_name = self.config['default_vault']
+        elif self.config['Credentials']['default_vault']:
+            self.vault_name = self.config['Credentials']['default_vault']
         else:
             print('Vault not specified')
             exit()
 
         if account_id:
             self.account_id = account_id
-        elif self.config['account']:
-            self.account_id = self.config['account']
+        elif self.config['Credentials']['account']:
+            self.account_id = self.config['Credentials']['account']
         else:
             print('Account not specified')
             exit()
