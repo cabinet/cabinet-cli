@@ -168,14 +168,24 @@ def tuple_type(value):
         raise argparse.argumenttypeerror("coordinates must be x,y,z")
 
 ###############################################################################
+# TODO: Refactor this to avoid having this global var
+
+COMMON_ARGS = [
+    (['-a', '--account'],
+        dict(help='Use this account to authenticate', action='store')),
+    (['-v', '--vault'],
+        dict(help='Use this vault', action='store'))
+]
+
+###############################################################################
 
 
 class CabinetController(CementBaseController):
     class Meta:
         label = 'base'
         description = "Cabinet's cli client for managing vaults."
-        arguments = [
-            (['-v', '--version'], dict(action='version', version=BANNER))
+        arguments = COMMON_ARGS + [
+            (['--version'], dict(action='version', version=BANNER))
         ]
 
     @expose(hide=True)
@@ -189,13 +199,9 @@ class ItemController(CementBaseController):
         label = 'item'
         stacked_on = 'base'
         stacked_type = 'nested'
-        arguments = [
+        arguments = COMMON_ARGS + [
             (['name'],
              dict(help='The item name.', action='store')),
-            (['-a', '--account'],
-             dict(help='Use this account to authenticate', action='store')),
-            (['-v', '--vault'],
-             dict(help='Use this vault', action='store')),
             (['-t', '--tag'],
              dict(help='Add a tag to the item', action='append')),
             (['--tags'],
@@ -256,11 +262,7 @@ class SearchController(CementBaseController):
         label = 'search'
         stacked_on = 'base'
         stacked_type = 'nested'
-        arguments = [
-            (['-a', '--account'],
-             dict(help='Use this account to authenticate', action='store')),
-            (['-v', '--vault'],
-             dict(help='Use this vault', action='store')),
+        arguments = COMMON_ARGS + [
             (['-s', '--show-tags'],
              dict(help='Show items with tags.', action='store_true')),
             (['-t', '--tag'],
