@@ -8,12 +8,14 @@
 #   cement   : http://builtoncement.com/2.10/index.html
 #
 # TODO:
-#   - Move the cli to it's own repo (inside a new 'Cabinet' organization).
 #   - Refactor the code to move each class, utils to its own module.
 
 import os
 import argparse
 
+from sys import exit
+from getpass import getpass
+from configparser import ConfigParser
 from cement.core.foundation import CementApp
 from cement.core.controller import CementBaseController, expose
 
@@ -34,25 +36,53 @@ class CabinetWrapper:
     """
 
     def __init__(self):
-        current_path = os.getcwd()
         join = os.path.join
-        self.config_path = join(current_path, 'test.data', 'secrets')
-        self.default_vault_path = join(current_path, 'test.data', 'vaults')
-        self.load_credentials()
+        self.base_path = join(os.path.expanduser('~'), '.config', 'cabinet')
+        self.config_file = join(self.base_path, 'cli.ini')
+        self.secrets_path = join(self.base_path, 'secrets')
+        self.vault_path = join(self.base_path, 'vaults')
+        self.config = ConfigParser()
+        self.config.read(self.config_file)
 
-    def load_credentials(self):
+    def load_credentials(self, vault_name=None, account_id=None):
         """
-        TODO: Implement reading credentials from stdin.
-        TODO: Implement reading credentials from config file.
+        It loads the vault name and account id from the configuration, then
+        it overrides the configuration with the cli options (if entered).
+        Finally, it prompts for the account password and opens the vault.
+
+        Params:
+        :param vault_name: The name of the vault
+        :type: String
+        :param account_id:
+        :type: String
+
+        TODO: Move the print and die to utils
         """
-        self.account_id = 'my-name@my-company.com'
-        self.password = 'asdfasdf'
-        self.vault_name = 'test-vault'
+
+        if vault_name:
+            self.vault_name = vault_name
+        elif 'Credentials' in self.config and 'default_vault' in \
+                                              self.config['Credentials']:
+            self.vault_name = self.config['Credentials']['default_vault']
+        else:
+            print('Vault not specified')
+            exit()
+
+        if account_id:
+            self.account_id = account_id
+        elif 'Credentials' in self.config and 'account' in \
+                                              self.config['Credentials']:
+            self.account_id = self.config['Credentials']['account']
+        else:
+            print('Account not specified')
+            exit()
+
+        self.password = getpass()
         return self.open_vault(self.account_id, self.password, self.vault_name)
 
-    def open_vault(self, account_id, password, vault_name, vault_path=None):
+    def open_vault(self, account_id, password, vault_name):
         """
-        Open the vault identified by the vault_name, vault_path.
+        Open the vault identified by the vault_name.
 
         Params:
         :param account_id:
@@ -61,17 +91,12 @@ class CabinetWrapper:
         :type: String
         :param vault_name: The name of the vault
         :type: String
-        :param vault_path: The location of the vault.
-        :type: String
 
         TODO: Implement account_id/password/vault validation and opening
         """
 
-        if vault_path is None:
-            vault_path = self.default_vault_path
-
-        self.cab = Cabinet(account_id, password, self.config_path)
-        self.cab.open(vault_name, vault_path)
+        self.cab = Cabinet(account_id, password, self.secrets_path)
+        self.cab.open(vault_name, self.vault_path)
 
         # TODO: Add open check. For this, the vault should verify keys
         return True
@@ -143,14 +168,24 @@ def tuple_type(value):
         raise argparse.argumenttypeerror("coordinates must be x,y,z")
 
 ###############################################################################
+# TODO: Refactor this to avoid having this global var
+
+COMMON_ARGS = [
+    (['-a', '--account'],
+        dict(help='Use this account to authenticate', action='store')),
+    (['-v', '--vault'],
+        dict(help='Use this vault', action='store'))
+]
+
+###############################################################################
 
 
 class CabinetController(CementBaseController):
     class Meta:
         label = 'base'
         description = "Cabinet's cli client for managing vaults."
-        arguments = [
-            (['-v', '--version'], dict(action='version', version=BANNER))
+        arguments = COMMON_ARGS + [
+            (['--version'], dict(action='version', version=BANNER))
         ]
 
     @expose(hide=True)
@@ -164,7 +199,7 @@ class ItemController(CementBaseController):
         label = 'item'
         stacked_on = 'base'
         stacked_type = 'nested'
-        arguments = [
+        arguments = COMMON_ARGS + [
             (['name'],
              dict(help='The item name.', action='store')),
             (['-t', '--tag'],
@@ -180,11 +215,13 @@ class ItemController(CementBaseController):
     @expose(help='Get an item from the vault.')
     def get(self):
         """Get an item from the vault"""
+        account_id = self.app.pargs.account
+        vault_name = self.app.pargs.vault
         name = self.app.pargs.name
         if name:
             self.app.log.debug('Looking for item with name "{0}"'.format(name))
             cab = CabinetWrapper()
-            if cab.load_credentials():
+            if cab.load_credentials(vault_name, account_id):
                 item = cab.get_item(name)
                 if item:
                     print(item)
@@ -194,6 +231,8 @@ class ItemController(CementBaseController):
     @expose(help="Add an item to the vault.")
     def add(self):
         """Add an item to the vault"""
+        account_id = self.app.pargs.account
+        vault_name = self.app.pargs.vault
         name = self.app.pargs.name
         tags = self.app.pargs.tags
         if not tags:
@@ -206,7 +245,7 @@ class ItemController(CementBaseController):
 
         if name:
             cab = CabinetWrapper()
-            if cab.load_credentials():
+            if cab.load_credentials(vault_name, account_id):
                 cab.add_item({
                     'name': name,
                     'tags': tags,
@@ -223,7 +262,7 @@ class SearchController(CementBaseController):
         label = 'search'
         stacked_on = 'base'
         stacked_type = 'nested'
-        arguments = [
+        arguments = COMMON_ARGS + [
             (['-s', '--show-tags'],
              dict(help='Show items with tags.', action='store_true')),
             (['-t', '--tag'],
@@ -239,12 +278,14 @@ class SearchController(CementBaseController):
     @expose(help='Get all the items in the vault.')
     def default(self):
         """Print all the item names (and tags if apply) to stdout."""
+        account_id = self.app.pargs.account
+        vault_name = self.app.pargs.vault
         tags = self.app.pargs.tags
         if not tags:
             tags = [] if not self.app.pargs.tag else self.app.pargs.tag
         tag_tpl = " tagged with {1}" if self.app.pargs.show_tags else ''
         cab = CabinetWrapper()
-        if cab.load_credentials():
+        if cab.load_credentials(vault_name, account_id):
             item_list = cab.get_all().values()
             item_list = [item for item in item_list
                          if set(tags).issubset(item['tags'])]
