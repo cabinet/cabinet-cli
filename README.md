@@ -5,14 +5,14 @@ An CLI for Cabinet.
 ## Installation
 
 ```
-pip install -r requiremen.txt
+pip install -r requirements.txt
 ```
 
 ## Configuration
 
 By default, the cli will read the configuration file located on `~/.config/cabinet/cli.ini`. So far, it only the following parameters are configurable:
 
-* `account` : The users account.
+* `account` : The user's account.
 * `default_vault` : The default vault name to be used if none is specified.
 
 The configuration file (`cli.ini`) looks like:
