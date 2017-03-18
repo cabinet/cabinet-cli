@@ -17,6 +17,18 @@ class CabinetWrapper:
     """
 
     def __init__(self, vault_name=None, account_id=None):
+        """
+        Initialize the cabinet instance using the given vault/account or from
+        the configuration file if you don't specify them.
+
+        This will prompt for the account password to open the vault.
+
+        :param vault_name: The name of the vault
+        :type: str
+
+        :param account_id:
+        :type: str
+        """
         join = os.path.join
         self.base_path = join(os.path.expanduser('~'), '.config', 'cabinet')
         self.config_file = join(self.base_path, 'cli.ini')
@@ -127,8 +139,14 @@ class CabinetWrapper:
         """
         Add an item to the vault.
 
-        :param item: The item to be added.
-        :type: Dictionary
+        :param item: The item's name
+        :type: str
+
+        :param tags: The item's tags
+        :type: list
+
+        :param content: The item's contents
+        :type: any
         """
         if self._ready:
             item = {
@@ -139,6 +157,15 @@ class CabinetWrapper:
             self.cab.add(item)
 
     def search(self, tags, show_tags):
+        """
+        Search for items with the given tags.
+
+        :param tags: the tags to search for
+        :type tags: list
+
+        :param show_tags: whether we should show the tags or not
+        :type show_tags: bool
+        """
         if self._ready:
             item_list = self.get_by_tags(tags)
             print("The following items were found:")
