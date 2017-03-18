@@ -113,12 +113,7 @@ class ItemController(CementBaseController):
         if name:
             self.app.log.debug('Looking for item with name "{0}"'.format(name))
             cab = CabinetWrapper()
-            if cab.load_credentials(vault_name, account_id):
-                item = cab.get_item(name)
-                if item:
-                    print(item)
-                else:
-                    print('Item with name "{0}" not found!'.format(name))
+            cab.get(vault_name, account_id, name)
 
     @expose(help="Add an item to the vault.")
     def add(self):

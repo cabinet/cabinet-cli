@@ -102,7 +102,7 @@ class CabinetWrapper:
         """
         return self.cab.get_all()
 
-    def get_item(self, name):
+    def get_item(self, vault_name, account_id, name):
         """
         Get an item from the vault.
 
@@ -112,6 +112,13 @@ class CabinetWrapper:
         :returns: The item with the specified name.
         :type: Dictionary
         """
+        if self.load_credentials(vault_name, account_id):
+            item = self.cab.get_item(name)
+            if item:
+                print(item)
+            else:
+                print('Item with name "{0}" not found!'.format(name))
+
         return self.cab.get(name)
 
     def add_item(self, vault_name, account_id, name, tags, content):
