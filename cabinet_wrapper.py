@@ -122,3 +122,12 @@ class CabinetWrapper:
         :type: Dictionary
         """
         self.cab.add(item)
+
+    def search(self, vault_name, account_id, tags, show_tags):
+        if self.load_credentials(vault_name, account_id):
+            item_list = self.get_by_tags(tags)
+            print("The following items were found:")
+            tag_tpl = " tagged with {1}" if show_tags else ''
+            for item in item_list:
+                print(('\t-"{0}"' + tag_tpl).format(item['name'],
+                                                    item['tags']))

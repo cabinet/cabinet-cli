@@ -175,14 +175,10 @@ class SearchController(CementBaseController):
         tags = self.app.pargs.tags
         if not tags:
             tags = [] if not self.app.pargs.tag else self.app.pargs.tag
-        tag_tpl = " tagged with {1}" if self.app.pargs.show_tags else ''
+        show_tags = self.app.pargs.show_tags
+
         cab = CabinetWrapper()
-        if cab.load_credentials(vault_name, account_id):
-            item_list = cab.get_by_tags(tags)
-            print("The following items was found:")
-            for item in item_list:
-                print(('\t-"{0}"' + tag_tpl).format(item['name'],
-                                                    item['tags']))
+        cab.search(vault_name, account_id, tags, show_tags)
 
 
 class MyApp(CementApp):
