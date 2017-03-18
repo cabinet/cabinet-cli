@@ -112,8 +112,8 @@ class ItemController(CementBaseController):
         name = self.app.pargs.name
         if name:
             self.app.log.debug('Looking for item with name "{0}"'.format(name))
-            cab = CabinetWrapper()
-            cab.get(vault_name, account_id, name)
+            cab = CabinetWrapper(vault_name, account_id)
+            cab.get(name)
 
     @expose(help="Add an item to the vault.")
     def add(self):
@@ -131,8 +131,8 @@ class ItemController(CementBaseController):
             content_obj[key] = value
 
         if name:
-            cab = CabinetWrapper()
-            cab.add_item(vault_name, account_id, name, tags, content_obj)
+            cab = CabinetWrapper(vault_name, account_id)
+            cab.add_item(name, tags, content_obj)
         else:
             print('Insufficient arguments!')
 
@@ -167,8 +167,8 @@ class SearchController(CementBaseController):
             tags = [] if not self.app.pargs.tag else self.app.pargs.tag
         show_tags = self.app.pargs.show_tags
 
-        cab = CabinetWrapper()
-        cab.search(vault_name, account_id, tags, show_tags)
+        cab = CabinetWrapper(vault_name, account_id)
+        cab.search(tags, show_tags)
 
 
 class MyApp(CementApp):

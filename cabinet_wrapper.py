@@ -16,7 +16,7 @@ class CabinetWrapper:
     TODO: In the future we should try moving this all to the library.
     """
 
-    def __init__(self):
+    def __init__(self, vault_name=None, account_id=None):
         join = os.path.join
         self.base_path = join(os.path.expanduser('~'), '.config', 'cabinet')
         self.config_file = join(self.base_path, 'cli.ini')
@@ -25,7 +25,9 @@ class CabinetWrapper:
         self.config = ConfigParser()
         self.config.read(self.config_file)
 
-    def load_credentials(self, vault_name=None, account_id=None):
+        self._ready = self._load_credentials(vault_name, account_id)
+
+    def _load_credentials(self, vault_name=None, account_id=None):
         """
         It loads the vault name and account id from the configuration, then
         it overrides the configuration with the cli options (if entered).
@@ -102,7 +104,7 @@ class CabinetWrapper:
         """
         return self.cab.get_all()
 
-    def get_item(self, vault_name, account_id, name):
+    def get_item(self, name):
         """
         Get an item from the vault.
 
@@ -112,23 +114,23 @@ class CabinetWrapper:
         :returns: The item with the specified name.
         :type: Dictionary
         """
-        if self.load_credentials(vault_name, account_id):
+        if self._ready:
             item = self.cab.get_item(name)
             if item:
                 print(item)
             else:
                 print('Item with name "{0}" not found!'.format(name))
 
-        return self.cab.get(name)
+            return self.cab.get(name)
 
-    def add_item(self, vault_name, account_id, name, tags, content):
+    def add_item(self, name, tags, content):
         """
         Add an item to the vault.
 
         :param item: The item to be added.
         :type: Dictionary
         """
-        if self.load_credentials(vault_name, account_id):
+        if self._ready:
             item = {
                 'name': name,
                 'tags': tags,
@@ -136,8 +138,8 @@ class CabinetWrapper:
             }
             self.cab.add(item)
 
-    def search(self, vault_name, account_id, tags, show_tags):
-        if self.load_credentials(vault_name, account_id):
+    def search(self, tags, show_tags):
+        if self._ready:
             item_list = self.get_by_tags(tags)
             print("The following items were found:")
             tag_tpl = " tagged with {1}" if show_tags else ''
