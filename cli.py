@@ -137,12 +137,7 @@ class ItemController(CementBaseController):
 
         if name:
             cab = CabinetWrapper()
-            if cab.load_credentials(vault_name, account_id):
-                cab.add_item({
-                    'name': name,
-                    'tags': tags,
-                    'content': content_obj
-                })
+            cab.add_item(vault_name, account_id, name, tags, content_obj)
         else:
             print('Insufficient arguments!')
 

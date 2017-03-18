@@ -114,14 +114,20 @@ class CabinetWrapper:
         """
         return self.cab.get(name)
 
-    def add_item(self, item):
+    def add_item(self, vault_name, account_id, name, tags, content):
         """
         Add an item to the vault.
 
         :param item: The item to be added.
         :type: Dictionary
         """
-        self.cab.add(item)
+        if self.load_credentials(vault_name, account_id):
+            item = {
+                'name': name,
+                'tags': tags,
+                'content': content
+            }
+            self.cab.add(item)
 
     def search(self, vault_name, account_id, tags, show_tags):
         if self.load_credentials(vault_name, account_id):
