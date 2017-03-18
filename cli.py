@@ -101,6 +101,16 @@ class CabinetWrapper:
         # TODO: Add open check. For this, the vault should verify keys
         return True
 
+    def get_by_tags(self, tags):
+        """
+        Get all the items from the vault without the 'content' (i.e: only name
+        and tags) that matches all the given tags.
+
+        :returns: The list of items
+        :type: List of Dictionaries.
+        """
+        return self.cab.get_by_tags(tags)
+
     def get_all(self):
         """
         Get all the items from the vault without the 'content' (i.e: only name
@@ -286,9 +296,7 @@ class SearchController(CementBaseController):
         tag_tpl = " tagged with {1}" if self.app.pargs.show_tags else ''
         cab = CabinetWrapper()
         if cab.load_credentials(vault_name, account_id):
-            item_list = cab.get_all().values()
-            item_list = [item for item in item_list
-                         if set(tags).issubset(item['tags'])]
+            item_list = cab.get_by_tags(tags)
             print("The following items was found:")
             for item in item_list:
                 print(('\t-"{0}"' + tag_tpl).format(item['name'],
