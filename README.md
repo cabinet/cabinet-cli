@@ -33,7 +33,7 @@ The configuration file (`cli.ini`) looks like:
 # The cabinet account
 account=facu
 # The default vault to be used if none is specified
-default_vault=awesome-vault
+vault=awesome-vault
 ```
 
 ## CLI Overview
@@ -73,8 +73,8 @@ Usage: cab get [OPTIONS] NAME
 
 Options:
   --help  Show this message and exit.
-ivan in [~/data/Devel/Cabinet/cabinet-cli]
-(venv:cabinet) (git:migrate-to-click ✘) ➜ cab search --help
+
+➜ cab search --help
 Usage: cab search [OPTIONS]
 
   Item searching on cabinet

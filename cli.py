@@ -14,6 +14,7 @@ from cabinet_wrapper import CabinetWrapper
               help='Specify a vault to use')
 @click.pass_context
 def cli(ctx, account, vault):
+    """Cabinet's command line interface."""
     if ctx.obj is None:
         ctx.obj = {}
 
