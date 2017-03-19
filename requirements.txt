@@ -1,2 +1,2 @@
 -e git+https://github.com/cabinet/cabinet-lib.git#egg=cabinet-lib
-cement
+click==6.7

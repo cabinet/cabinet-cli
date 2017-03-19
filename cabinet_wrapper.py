@@ -4,7 +4,8 @@ import os
 
 from sys import exit
 from getpass import getpass
-from configparser import ConfigParser
+
+from utils import get_configs
 
 from cabinet import Cabinet
 
@@ -34,8 +35,6 @@ class CabinetWrapper:
         self.config_file = join(self.base_path, 'cli.ini')
         self.secrets_path = join(self.base_path, 'secrets')
         self.vault_path = join(self.base_path, 'vaults')
-        self.config = ConfigParser()
-        self.config.read(self.config_file)
 
         self._ready = self._load_credentials(vault_name, account_id)
 
@@ -53,21 +52,20 @@ class CabinetWrapper:
 
         TODO: Move the print and die to utils
         """
+        config = get_configs(self.config_file)
 
         if vault_name:
             self.vault_name = vault_name
-        elif 'Credentials' in self.config and 'default_vault' in \
-                                              self.config['Credentials']:
-            self.vault_name = self.config['Credentials']['default_vault']
+        elif config.get('vault_name'):
+            self.vault_name = config.get('vault_name')
         else:
             print('Vault not specified')
             exit()
 
         if account_id:
             self.account_id = account_id
-        elif 'Credentials' in self.config and 'account' in \
-                                              self.config['Credentials']:
-            self.account_id = self.config['Credentials']['account']
+        elif config.get('account_id'):
+            self.account_id = config.get('account_id')
         else:
             print('Account not specified')
             exit()
@@ -127,13 +125,11 @@ class CabinetWrapper:
         :type: Dictionary
         """
         if self._ready:
-            item = self.cab.get_item(name)
+            item = self.cab.get(name)
             if item:
                 print(item)
             else:
                 print('Item with name "{0}" not found!'.format(name))
-
-            return self.cab.get(name)
 
     def add_item(self, name, tags, content):
         """
