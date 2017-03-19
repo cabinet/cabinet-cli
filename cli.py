@@ -1,190 +1,96 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# This is the first cli prototype for the cabinet core.
-#
-# References;
-#   argparse : https://docs.python.org/3/library/argparse.html
-#   cement   : http://builtoncement.com/2.10/index.html
-#
-# TODO:
-#   - Refactor the code to move each class, utils to its own module.
+import click
 
-import signal
-import argparse
-
-from sys import exit
-from cement.core.foundation import CementApp
-from cement.core.controller import CementBaseController, expose
+from utils import get_content_from_editor
 
 from cabinet_wrapper import CabinetWrapper
 
 
-VERSION = '0.0.1'
-BANNER = """
-Cabinet command line v{0}
-GNU GENERAL PUBLIC LICENSE
-""".format(VERSION)
+@click.group()
+@click.option('account', '-a', '--account',
+              help='Specify an account to use')
+@click.option('vault', '-v', '--vault',
+              help='Specify a vault to use')
+@click.pass_context
+def cli(ctx, account, vault):
+    """Cabinet's command line interface."""
+    if ctx.obj is None:
+        ctx.obj = {}
+
+    if account or vault:
+        click.echo(">> Credentials")
+        click.echo("Account:", account)
+        click.echo("Vault:", vault)
+        ctx.obj['account'] = account
+        ctx.obj['vault'] = vault
 
 
-# TODO: Move the types out of this file, to a type folder/file. ###############
-def tags_type(value):
-    """
-    Parse the value to recover a list of tags.
+@cli.command()
+@click.argument('name')
+@click.option('tags', '-t', '--tag', multiple=True,
+              help='Specify tags for the item')
+@click.option('content', '-c', '--content',
+              help='The item content')
+@click.option('editor', '-e', '--use-editor', is_flag=True,
+              help="Use the default editor for entering the content")
+@click.pass_context
+def add(ctx, name, tags, content, editor):
+    """Add an item to cabinet"""
+    click.echo('>> Add item')
+    click.echo('Name: {0}'.format(name))
+    click.echo('Content: {0}'.format(content))
 
-    :param value: The value to parse
-    :type: String
-
-    :returns: A list of strings composed by spliting the value by ','.
-    :type: List
-    """
-    try:
-        return value.split(',')
-    except:
-        raise argparse.argumenttypeerror("Multiple tags should be separated by\
-                                          comma")
-
-
-def tuple_type(value):
-    """
-    Parse the value to recover a tuple
-
-    :param value: The value to parse
-    :type: String
-
-    :returns: A tuple of two values composed by spliting the value by ','.
-    :type: Tuple
-    """
-    try:
-        key, value = value.split(',')
-        return key, value
-    except:
-        raise argparse.argumenttypeerror("coordinates must be x,y,z")
-
-###############################################################################
-# TODO: Refactor this to avoid having this global var
-
-COMMON_ARGS = [
-    (['-a', '--account'],
-        dict(help='Use this account to authenticate', action='store')),
-    (['-v', '--vault'],
-        dict(help='Use this vault', action='store'))
-]
-
-###############################################################################
-
-
-class CabinetController(CementBaseController):
-    class Meta:
-        label = 'base'
-        description = "Cabinet's cli client for managing vaults."
-        arguments = COMMON_ARGS + [
-            (['--version'], dict(action='version', version=BANNER))
-        ]
-
-    @expose(hide=True)
-    def default(self):
-        """Without any parameter, the command will print the help"""
-        app.args.print_help()
-
-
-class ItemController(CementBaseController):
-    class Meta:
-        label = 'item'
-        stacked_on = 'base'
-        stacked_type = 'nested'
-        arguments = COMMON_ARGS + [
-            (['name'],
-             dict(help='The item name.', action='store')),
-            (['-t', '--tag'],
-             dict(help='Add a tag to the item', action='append')),
-            (['--tags'],
-             dict(help='Add multiple separated comma tags',
-                  type=tags_type, action='store')),
-            (['--content'],
-             dict(help='Add content to the item',
-                  type=tuple_type, action='append'))
-        ]
-
-    @expose(help='Get an item from the vault.')
-    def get(self):
-        """Get an item from the vault"""
-        account_id = self.app.pargs.account
-        vault_name = self.app.pargs.vault
-        name = self.app.pargs.name
-        if name:
-            self.app.log.debug('Looking for item with name "{0}"'.format(name))
-            cab = CabinetWrapper(vault_name, account_id)
-            cab.get(name)
-
-    @expose(help="Add an item to the vault.")
-    def add(self):
-        """Add an item to the vault"""
-        account_id = self.app.pargs.account
-        vault_name = self.app.pargs.vault
-        name = self.app.pargs.name
-        tags = self.app.pargs.tags
-        if not tags:
-            tags = [] if not self.app.pargs.tag else self.app.pargs.tag
-        content = [] if not self.app.pargs.content else self.app.pargs.content
-
-        content_obj = {}
-        for key, value in content:
-            content_obj[key] = value
-
-        if name:
-            cab = CabinetWrapper(vault_name, account_id)
-            cab.add_item(name, tags, content_obj)
+    if not content:
+        if editor:
+            content = get_content_from_editor()
+            print("Content from editor:", content)
         else:
-            print('Insufficient arguments!')
+            click.echo("Error: you need to specify the content")
+            return
+
+    if tags:
+        click.echo('Tags: %s' % ', '.join(tags))
+
+    account = ctx.obj.get('account')
+    vault = ctx.obj.get('vault')
+    cab = CabinetWrapper(account, vault)
+    cab.add_item(name, tags, content)
 
 
-class SearchController(CementBaseController):
-    """The command controller for searching within the vault values"""
-
-    class Meta:
-        label = 'search'
-        stacked_on = 'base'
-        stacked_type = 'nested'
-        arguments = COMMON_ARGS + [
-            (['-s', '--show-tags'],
-             dict(help='Show items with tags.', action='store_true')),
-            (['-t', '--tag'],
-             dict(help='Filter by tag', action='append')),
-            (['--tags'],
-             dict(help='Filter by multiple tags',
-                  type=tags_type, action='store')),
-            (['extra_arguments'],
-             dict(action='store', nargs='*')),
-        ]
-
-    # TODO: Think where should go the item filter (In the cabinet or here?)
-    @expose(help='Get all the items in the vault.')
-    def default(self):
-        """Print all the item names (and tags if apply) to stdout."""
-        account_id = self.app.pargs.account
-        vault_name = self.app.pargs.vault
-        tags = self.app.pargs.tags
-        if not tags:
-            tags = [] if not self.app.pargs.tag else self.app.pargs.tag
-        show_tags = self.app.pargs.show_tags
-
-        cab = CabinetWrapper(vault_name, account_id)
-        cab.search(tags, show_tags)
+@cli.command()
+@click.argument('name')
+@click.pass_context
+def get(ctx, name):
+    """Get an item from cabinet"""
+    account = ctx.obj.get('account')
+    vault = ctx.obj.get('vault')
+    cab = CabinetWrapper(account, vault)
+    cab.get_item(name)
 
 
-class MyApp(CementApp):
-    class Meta:
-        label = 'cabinet'
-        base_controller = 'base'
-        handlers = [CabinetController, ItemController, SearchController]
+@cli.command()
+def rm():
+    """[not implemented] Remove an item from cabinet"""
+    click.echo('Sorry! not implemented yet.')
 
 
-with MyApp() as app:
+@cli.command()
+@click.option('tags', '-t', '--tag', multiple=True,
+              help='Specify tags for the item')
+@click.option('show_tags', '-s', '--show-tags', is_flag=True,
+              help='Show items with tags.')
+@click.pass_context
+def search(ctx, tags, show_tags):
+    """Item searching on cabinet"""
+    if tags:
+        click.echo('Tags: %s' % ', '.join(tags))
 
-    def ctrl_c_handler(signal, frame):
-        print('\nGood-bye!')
-        exit(0)
+    account = ctx.obj.get('account')
+    vault = ctx.obj.get('vault')
+    cab = CabinetWrapper(account, vault)
+    cab.search(tags, show_tags)
 
-    signal.signal(signal.SIGINT, ctrl_c_handler)
-    app.run()
+
+if __name__ == '__main__':
+    cli()

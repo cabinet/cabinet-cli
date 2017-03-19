@@ -4,16 +4,27 @@ An CLI for Cabinet.
 
 ## Installation
 
+Get dependencies:
+
 ```
 pip install -r requirements.txt
 ```
+
+You can also install the cli as a local command inside the virtualenv thanks to the `setup.py` configuration.
+
+```
+pip install --editable .
+```
+
+You will have a `cab` command to use.
+
 
 ## Configuration
 
 By default, the cli will read the configuration file located on `~/.config/cabinet/cli.ini`. So far, it only the following parameters are configurable:
 
 * `account` : The user's account.
-* `default_vault` : The default vault name to be used if none is specified.
+* `vault` : The default vault name to be used if none is specified.
 
 The configuration file (`cli.ini`) looks like:
 
@@ -22,91 +33,54 @@ The configuration file (`cli.ini`) looks like:
 # The cabinet account
 account=facu
 # The default vault to be used if none is specified
-default_vault=awesome-vault
+vault=awesome-vault
 ```
 
-## CLI Sections
+## CLI Overview
 
-The command containse two sections:
+This are the now implemented features on the cli, hopefully this is self explanatory.
 
-* `search` : For seeking for a stored item
-* `item` : For adding and getting an specific item
-
-```profile
-usage: cabinet (sub-commands ...) [options ...] {arguments ...}
-
-Cabinet's cli client for managing vaults.
-
-commands:
-
-  item
-    Item Controller
-
-  search
-    Search Controller
-
-optional arguments:
-  -h, --help     show this help message and exit
-  --debug        toggle debug output
-  --quiet        suppress all output
-  -v, --version  show program's version number and exit
 ```
+➜ cab
+Usage: cab [OPTIONS] COMMAND [ARGS]...
 
-### Searching
+Options:
+  -a, --account TEXT  Specify an account to use
+  -v, --vault TEXT    Specify a vault to use
+  --help              Show this message and exit.
 
-```profile
-usage: cabinet (sub-commands ...) [options ...] {arguments ...}
+Commands:
+  add     Add an item to cabinet
+  get     Get an item from cabinet
+  rm      [not implemented] Remove an item from cabinet
+  search  Item searching on cabinet
 
-Search Controller
+➜ cab add --help
+Usage: cab add [OPTIONS] NAME
 
-commands:
+  Add an item to cabinet
 
-  default
-    Get all the items in the vault.
+Options:
+  -t, --tag TEXT      Specify tags for the item
+  -c, --content TEXT  The item content
+  -e, --edit-content  The item content
+  --help              Show this message and exit.
 
-positional arguments:
-  extra_arguments
+➜ cab get --help
+Usage: cab get [OPTIONS] NAME
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --debug               toggle debug output
-  --quiet               suppress all output
-  -a ACCOUNT, --account ACCOUNT
-                        Use this account to authenticate
-  -v VAULT, --vault VAULT
-                        Use this vault
-  -s, --show-tags       Show items with tags.
-  -t TAG, --tag TAG     Filter by tag
-  --tags TAGS           Filter by multiple tags
-```
+  Get an item from cabinet
 
-### Adding/Getting
+Options:
+  --help  Show this message and exit.
 
-```profile
-usage: cabinet (sub-commands ...) [options ...] {arguments ...}
+➜ cab search --help
+Usage: cab search [OPTIONS]
 
-Item Controller
+  Item searching on cabinet
 
-commands:
-
-  add
-    Add an item to the vault.
-
-  get
-    Get an item from the vault.
-
-positional arguments:
-  name                  The item name.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --debug               toggle debug output
-  --quiet               suppress all output
-  -a ACCOUNT, --account ACCOUNT
-                        Use this account to authenticate
-  -v VAULT, --vault VAULT
-                        Use this vault
-  -t TAG, --tag TAG     Add a tag to the item
-  --tags TAGS           Add multiple separated comma tags
-  --content CONTENT     Add content to the item
+Options:
+  -t, --tag TEXT   Specify tags for the item
+  -s, --show-tags  Show items with tags.
+  --help           Show this message and exit.
 ```
