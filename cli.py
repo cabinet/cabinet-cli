@@ -32,8 +32,8 @@ def cli(ctx, account, vault):
               help='Specify tags for the item')
 @click.option('content', '-c', '--content',
               help='The item content')
-@click.option('editor', '-e', '--edit-content', is_flag=True,
-              help='The item content')
+@click.option('editor', '-e', '--use-editor', is_flag=True,
+              help="Use the default editor for entering the content")
 @click.pass_context
 def add(ctx, name, tags, content, editor):
     """Add an item to cabinet"""
