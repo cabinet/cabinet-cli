@@ -10,8 +10,10 @@
 # TODO:
 #   - Refactor the code to move each class, utils to its own module.
 
+import signal
 import argparse
 
+from sys import exit
 from cement.core.foundation import CementApp
 from cement.core.controller import CementBaseController, expose
 
@@ -179,4 +181,10 @@ class MyApp(CementApp):
 
 
 with MyApp() as app:
+
+    def ctrl_c_handler(signal, frame):
+        print('\nGood-bye!')
+        exit(0)
+
+    signal.signal(signal.SIGINT, ctrl_c_handler)
     app.run()
