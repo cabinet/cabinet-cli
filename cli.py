@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import click
 
+from sys import stdin
 from utils import get_content_from_editor
 
 from cabinet_wrapper import CabinetWrapper
@@ -32,17 +33,23 @@ def cli(ctx, account, vault):
               help='Specify tags for the item')
 @click.option('content', '-c', '--content',
               help='The item content')
+@click.option('from_stdin', '-i', '--from-stdin', is_flag=True,
+              help="Get the content from stdin")
 @click.option('editor', '-e', '--use-editor', is_flag=True,
               help="Use the default editor for entering the content")
 @click.pass_context
-def add(ctx, name, tags, content, editor):
+def add(ctx, name, tags, content, from_stdin, editor):
     """Add an item to cabinet"""
     click.echo('>> Add item')
     click.echo('Name: {0}'.format(name))
     click.echo('Content: {0}'.format(content))
 
     if not content:
-        if editor:
+        if from_stdin:
+            content = ""
+            for line in stdin:
+                content = content + line
+        elif editor:
             content = get_content_from_editor()
             print("Content from editor:", content)
         else:
