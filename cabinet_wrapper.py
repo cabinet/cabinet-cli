@@ -114,22 +114,30 @@ class CabinetWrapper:
         """
         return self.cab.get_all()
 
-    def get_item(self, name):
+    def get_item(self, name, print_all):
         """
         Get an item from the vault.
 
         :param name: The name of the item to recover.
         :type: String
+        :param print_all: Print all the information related to the item.
+        :type: Boolean
 
         :returns: The item with the specified name.
         :type: Dictionary
         """
         if self._ready:
             item = self.cab.get(name)
-            if item:
-                print(item)
-            else:
+
+            if not item:
                 print('Item with name "{0}" not found!'.format(name))
+                return
+
+            if print_all:
+                print("Name: {0}\nTags: {1}\nContent: {2}"
+                      .format(name, item['tags'], item['content']))
+            else:
+                print(item['content'])
 
     def add_item(self, name, tags, content):
         """

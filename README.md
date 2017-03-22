@@ -63,7 +63,8 @@ Usage: cab add [OPTIONS] NAME
 Options:
   -t, --tag TEXT      Specify tags for the item
   -c, --content TEXT  The item content
-  -e, --edit-content  The item content
+  -i, --from-stdin    Get the content from stdin
+  -e, --use-editor    Use the default editor for entering the content
   --help              Show this message and exit.
 
 ➜ cab get --help
@@ -72,6 +73,7 @@ Usage: cab get [OPTIONS] NAME
   Get an item from cabinet
 
 Options:
+  -a, --all  Print the item with all its information (tags and name)
   --help  Show this message and exit.
 
 ➜ cab search --help
