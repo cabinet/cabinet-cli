@@ -67,13 +67,15 @@ def add(ctx, name, tags, content, from_stdin, editor):
 
 @cli.command()
 @click.argument('name')
+@click.option('print_all', '-a', '--all', is_flag=True,
+              help='Print the item with all its information (tags and name)')
 @click.pass_context
-def get(ctx, name):
+def get(ctx, name, print_all):
     """Get an item from cabinet"""
     account = ctx.obj.get('account')
     vault = ctx.obj.get('vault')
     cab = CabinetWrapper(account, vault)
-    cab.get_item(name)
+    cab.get_item(name, print_all)
 
 
 @cli.command()
