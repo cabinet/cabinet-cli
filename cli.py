@@ -51,7 +51,8 @@ def add(ctx, name, tags, content, from_stdin, editor):
                 content = content + line
         elif editor:
             content = get_content_from_editor()
-            print("Content from editor:", content)
+            print("Content from editor:")
+            print(content)
         else:
             click.echo("Error: you need to specify the content")
             return
@@ -82,6 +83,16 @@ def get(ctx, name, print_all):
 def rm():
     """[not implemented] Remove an item from cabinet"""
     click.echo('Sorry! not implemented yet.')
+
+
+@cli.command()
+@click.pass_context
+def tags(ctx):
+    """Get tags from cabinet"""
+    account = ctx.obj.get('account')
+    vault = ctx.obj.get('vault')
+    cab = CabinetWrapper(account, vault)
+    cab.get_tags()
 
 
 @cli.command()
