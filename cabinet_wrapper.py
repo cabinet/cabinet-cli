@@ -104,6 +104,13 @@ class CabinetWrapper:
         """
         return self.cab.get_by_tags(tags)
 
+    def get_tags(self):
+        """
+        Get all the tags from the vault.
+        """
+        tags = self.cab.get_tags()
+        print("Tags:", ','.join(tags))
+
     def get_all(self):
         """
         Get all the items from the vault without the 'content' (i.e: only name
