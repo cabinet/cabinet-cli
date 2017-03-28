@@ -37,8 +37,10 @@ def cli(ctx, account, vault):
               help="Get the content from stdin")
 @click.option('editor', '-e', '--use-editor', is_flag=True,
               help="Use the default editor for entering the content")
+@click.option('update', '-u', '--update', is_flag=True,
+              help="Update the contents of an existing item")
 @click.pass_context
-def add(ctx, name, tags, content, from_stdin, editor):
+def add(ctx, name, tags, content, from_stdin, editor, update):
     """Add an item to cabinet"""
     click.echo('>> Add item')
     click.echo('Name: {0}'.format(name))
@@ -63,7 +65,26 @@ def add(ctx, name, tags, content, from_stdin, editor):
     account = ctx.obj.get('account')
     vault = ctx.obj.get('vault')
     cab = CabinetWrapper(account, vault)
-    cab.add_item(name, tags, content)
+    if update:
+        cab.update(name, tags, content)
+    else:
+        cab.add_item(name, tags, content)
+
+
+@cli.command()
+@click.argument('name')
+@click.argument('new_name')
+@click.pass_context
+def rename(ctx, name, new_name):
+    """Rename an existing item"""
+    click.echo('>> Rename item')
+    click.echo('Name: {0}'.format(name))
+    click.echo('New name: {0}'.format(new_name))
+
+    account = ctx.obj.get('account')
+    vault = ctx.obj.get('vault')
+    cab = CabinetWrapper(account, vault)
+    cab.rename(name, new_name)
 
 
 @cli.command()
