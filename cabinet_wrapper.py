@@ -146,6 +146,25 @@ class CabinetWrapper:
             else:
                 print(item['content'])
 
+    def get_item_content(self, name):
+        """
+        Get the content of an item from the vault.
+
+        :param name: The name of the item to recover.
+        :type: String
+
+        :returns: The item's content.
+        :type: String
+        """
+        if self._ready:
+            item = self.cab.get(name)
+
+            if not item:
+                print('Item with name "{0}" not found!'.format(name))
+                return
+
+            return item['content']
+
     def add_item(self, name, tags, content):
         """
         Add an item to the vault.
