@@ -68,6 +68,46 @@ def add(ctx, name, tags, content, from_stdin, editor):
 
 @cli.command()
 @click.argument('name')
+@click.option('tags', '-t', '--tag', multiple=True,
+              help='Specify tags for the item')
+@click.option('content', '-c', '--content',
+              help='The item content')
+@click.option('from_stdin', '-i', '--from-stdin', is_flag=True,
+              help="Get the content from stdin")
+@click.option('editor', '-e', '--use-editor', is_flag=True,
+              help="Use the default editor for entering the content")
+@click.pass_context
+def update(ctx, name, tags, content, from_stdin, editor):
+    """Add an item to cabinet"""
+    click.echo('>> Edit item')
+    click.echo('Name: {0}'.format(name))
+
+    account = ctx.obj.get('account')
+    vault = ctx.obj.get('vault')
+    cab = CabinetWrapper(account, vault)
+
+    if not content:
+        if from_stdin:
+            content = ""
+            for line in stdin:
+                content = content + line
+        elif editor:
+            current_content = cab.get_item_content(name)
+            content = get_content_from_editor(current_content)
+            print("Content from editor:")
+            print(content)
+        else:
+            click.echo("Error: you need to specify the content")
+            return
+
+    if tags:
+        click.echo('Tags: %s' % ', '.join(tags))
+
+    cab.update(name, tags, content)
+
+
+@cli.command()
+@click.argument('name')
 @click.argument('new_name')
 @click.pass_context
 def rename(ctx, name, new_name):
