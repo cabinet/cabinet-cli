@@ -8,15 +8,29 @@ import tempfile
 from configparser import ConfigParser
 
 
-def get_content_from_editor():
+def get_content_from_editor(current_content=None):
+    """
+    Get the content from the default editor. If there is a current content, it
+    loads it within the editor.
+
+    :param current_content: The current item's content.
+    :type: String
+
+    :returns: The updated item's content.
+    :type: String
+    """
     t = tempfile.NamedTemporaryFile(delete=True)
+    if current_content:
+        t.write(current_content.encode('utf-8'))
+        t.flush()
+
     try:
         editor = os.environ['EDITOR']
     except KeyError:
         editor = 'nano'
     subprocess.call([editor, t.name])
 
-    # content = t.read().splitlines()
+    t.seek(0)
     b_content = t.read()
     t.close()
 
