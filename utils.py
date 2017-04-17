@@ -14,10 +14,10 @@ def get_content_from_editor(current_content=None):
     loads it within the editor.
 
     :param current_content: The current item's content.
-    :type: String
+    :type: str
 
     :returns: The updated item's content.
-    :type: String
+    :type: str
     """
     t = tempfile.NamedTemporaryFile(delete=True)
     if current_content:

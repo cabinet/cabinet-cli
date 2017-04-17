@@ -46,9 +46,9 @@ class CabinetWrapper:
 
         Params:
         :param vault_name: The name of the vault
-        :type: String
+        :type: str
         :param account_id:
-        :type: String
+        :type: str
 
         TODO: Move the print and die to utils
         """
@@ -79,11 +79,11 @@ class CabinetWrapper:
 
         Params:
         :param account_id:
-        :type: String
+        :type: str
         :param password:
-        :type: String
+        :type: str
         :param vault_name: The name of the vault
-        :type: String
+        :type: str
 
         TODO: Implement account_id/password/vault validation and opening
         """
@@ -100,7 +100,7 @@ class CabinetWrapper:
         and tags) that matches all the given tags.
 
         :returns: The list of items
-        :type: List of Dictionaries.
+        :type: list of dicts.
         """
         return self.cab.get_by_tags(tags)
 
@@ -117,7 +117,7 @@ class CabinetWrapper:
         and tags).
 
         :returns: The list of items
-        :type: List of Dictionaries.
+        :type: list of dicts.
         """
         return self.cab.get_all()
 
@@ -126,12 +126,12 @@ class CabinetWrapper:
         Get an item from the vault.
 
         :param name: The name of the item to recover.
-        :type: String
+        :type: str
         :param print_all: Print all the information related to the item.
-        :type: Boolean
+        :type: bool
 
         :returns: The item with the specified name.
-        :type: Dictionary
+        :type: dict
         """
         if self._ready:
             item = self.cab.get(name)
@@ -151,10 +151,10 @@ class CabinetWrapper:
         Get the content of an item from the vault.
 
         :param name: The name of the item to recover.
-        :type: String
+        :type: str
 
         :returns: The item's content.
-        :type: String
+        :type: str
         """
         if self._ready:
             item = self.cab.get(name)
