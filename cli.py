@@ -93,17 +93,19 @@ def update(ctx, name, tags, content, from_stdin, editor):
                 content = content + line
         elif editor:
             current_content = cab.get_item_content(name)
-            content = get_content_from_editor(current_content)
-            print("Content from editor:")
-            print(content)
+            if current_content:
+                content = get_content_from_editor(current_content)
+                print("Content from editor:")
+                print(content)
         else:
             click.echo("Error: you need to specify the content")
             return
 
-    if tags:
-        click.echo('Tags: %s' % ', '.join(tags))
+    if content:
+        if tags:
+            click.echo('Tags: %s' % ', '.join(tags))
 
-    cab.update(name, tags, content)
+        cab.update(name, tags, content)
 
 
 @cli.command()
