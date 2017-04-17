@@ -78,7 +78,7 @@ def add(ctx, name, tags, content, from_stdin, editor):
               help="Use the default editor for entering the content")
 @click.pass_context
 def update(ctx, name, tags, content, from_stdin, editor):
-    """Add an item to cabinet"""
+    """Update an existing item"""
     click.echo('>> Edit item')
     click.echo('Name: {0}'.format(name))
 
