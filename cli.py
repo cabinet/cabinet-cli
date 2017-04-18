@@ -102,8 +102,9 @@ def update(ctx, name, tags, content, from_stdin, editor):
             return
 
     if content:
-        if tags:
-            click.echo('Tags: %s' % ', '.join(tags))
+        if not tags:
+            tags = cab.get_item_tags(name)
+        click.echo('Tags: %s' % ', '.join(tags))
 
         cab.update(name, tags, content)
 
