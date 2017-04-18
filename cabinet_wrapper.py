@@ -70,8 +70,22 @@ class CabinetWrapper:
             print('Account not specified')
             exit()
 
-        self.password = getpass()
-        return self.open_vault(self.account_id, self.password, self.vault_name)
+        is_open = False
+        for i in range(3):
+            try:
+                self.password = getpass()
+                is_open = self.open_vault(self.account_id, self.password,
+                                          self.vault_name)
+                break
+            except Exception as e:
+                msg = "There was an error opening the vault."
+                if i < 2:
+                    msg += " Wrong password? Try again or Ctrl+C to quit."
+                else:
+                    msg += " Exit."
+                print(msg)
+
+        return is_open
 
     def open_vault(self, account_id, password, vault_name):
         """
