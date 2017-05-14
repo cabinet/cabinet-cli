@@ -17,7 +17,7 @@ class CabinetWrapper:
     TODO: In the future we should try moving this all to the library.
     """
 
-    def __init__(self, vault_name=None, account_id=None):
+    def __init__(self, vault_name=None, account_id=None, password=None):
         """
         Initialize the cabinet instance using the given vault/account or from
         the configuration file if you don't specify them.
@@ -36,9 +36,9 @@ class CabinetWrapper:
         self.secrets_path = join(self.base_path, 'secrets')
         self.vault_path = join(self.base_path, 'vaults')
 
-        self._ready = self._load_credentials(vault_name, account_id)
+        self._ready = self._load_credentials(vault_name, account_id, password)
 
-    def _load_credentials(self, vault_name=None, account_id=None):
+    def _load_credentials(self, vault_name=None, account_id=None, password=None):
         """
         It loads the vault name and account id from the configuration, then
         it overrides the configuration with the cli options (if entered).
@@ -73,7 +73,11 @@ class CabinetWrapper:
         is_open = False
         for i in range(3):
             try:
-                self.password = getpass()
+                if password is None:
+                    self.password = getpass()
+                else:
+                    self.password = password
+
                 is_open = self.open_vault(self.account_id, self.password,
                                           self.vault_name)
                 break

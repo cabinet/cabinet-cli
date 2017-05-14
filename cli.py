@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import click
 
+import os
 from sys import stdin
 from utils import get_content_from_editor
 
@@ -13,8 +14,10 @@ from cabinet_wrapper import CabinetWrapper
               help='Specify an account to use')
 @click.option('vault', '-v', '--vault',
               help='Specify a vault to use')
+@click.option('password_env', '-p', '--password-env', is_flag=True,
+              help='Get password from CABPASS environment variable.')
 @click.pass_context
-def cli(ctx, account, vault):
+def cli(ctx, account, vault, password_env):
     """Cabinet's command line interface."""
     if ctx.obj is None:
         ctx.obj = {}
@@ -25,6 +28,10 @@ def cli(ctx, account, vault):
         click.echo("Vault:", vault)
         ctx.obj['account'] = account
         ctx.obj['vault'] = vault
+
+    if password_env:
+        password = os.environ.get("CABPASS")
+        ctx.obj['password'] = password
 
 
 @cli.command()
@@ -84,7 +91,8 @@ def update(ctx, name, tags, content, from_stdin, editor):
 
     account = ctx.obj.get('account')
     vault = ctx.obj.get('vault')
-    cab = CabinetWrapper(account, vault)
+    password = ctx.obj.get('password')
+    cab = CabinetWrapper(account, vault, password)
 
     if not content:
         if from_stdin:
@@ -134,7 +142,8 @@ def get(ctx, name, print_all):
     """Get an item from cabinet"""
     account = ctx.obj.get('account')
     vault = ctx.obj.get('vault')
-    cab = CabinetWrapper(account, vault)
+    password = ctx.obj.get('password')
+    cab = CabinetWrapper(account, vault, password)
     cab.get_item(name, print_all)
 
 
@@ -167,7 +176,8 @@ def search(ctx, tags, show_tags):
 
     account = ctx.obj.get('account')
     vault = ctx.obj.get('vault')
-    cab = CabinetWrapper(account, vault)
+    password = ctx.obj.get('password')
+    cab = CabinetWrapper(account, vault, password)
     cab.search(tags, show_tags)
 
 
