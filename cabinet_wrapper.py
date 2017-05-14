@@ -241,10 +241,12 @@ class CabinetWrapper:
         :param show_tags: whether we should show the tags or not
         :type show_tags: bool
         """
-        if self._ready:
-            item_list = self.get_by_tags(tags)
-            print("The following items were found:")
-            tag_tpl = " tagged with {1}" if show_tags else ''
-            for item in item_list:
-                print(('\t-"{0}"' + tag_tpl).format(item['name'],
-                                                    item['tags']))
+        if not self._ready:
+            return
+
+        item_list = self.get_by_tags(tags)
+        for item in item_list:
+            line = "{0} \ttags: {1}"
+
+            tags = ", ".join(item['tags'])
+            print(line.format(item['name'], tags))
