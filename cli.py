@@ -148,9 +148,23 @@ def get(ctx, name, print_all):
 
 
 @cli.command()
-def rm():
-    """[not implemented] Remove an item from cabinet"""
-    click.echo('Sorry! not implemented yet.')
+@click.argument('name')
+@click.pass_context
+def rm(ctx, name):
+    """Remove an item from cabinet"""
+
+    click.echo('>> Removing item')
+    click.echo('Name: {0}'.format(name))
+
+    if not click.confirm('Do you want to continue?'):
+        click.echo('Action canceled')
+        return
+
+    account = ctx.obj.get('account')
+    vault = ctx.obj.get('vault')
+    password = ctx.obj.get('password')
+    cab = CabinetWrapper(account, vault, password)
+    cab.remove(name)
 
 
 @cli.command()

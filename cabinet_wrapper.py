@@ -231,6 +231,10 @@ class CabinetWrapper:
         if self._ready:
             self.cab.rename(name, new_name)
 
+    def remove(self, name):
+        if self._ready:
+            self.cab.remove(name)
+
     def search(self, tags, show_tags):
         """
         Search for items with the given tags.
